@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -32,6 +33,23 @@ func main() {
 				return
 			}
 			mutex.RUnlock()
+
+			err := r.ParseForm()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			word := r.FormValue("searchWord")
+			log.Printf("searchWord = %s\n", word)
+
+			words, ok := r.Form["searchWord"]
+			log.Printf("search words = %v has values %v\n", words, ok)
+
+			log.Print("all queries")
+			for key, values := range r.Form {
+				log.Printf(" %s: %v\n", key, values)
+			}
 		case http.MethodPost:
 			var c Comment
 			if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
